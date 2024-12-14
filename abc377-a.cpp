@@ -1,4 +1,4 @@
-// atcoder abc377-a.cpp
+// atcoder abc377-a.cpp   Copyright (c) 2024 colorful-lantern
 
 #include <iostream>
 using namespace std;
