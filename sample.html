@@ -11,7 +11,15 @@
   
     gtag('config', 'G-NVC3G5C1HH');
   </script>
+  <script>
+    function showAlert(buttonId) {
+      alert("Button ID: " + buttonId);
+    }
+  </script>
   <body>
     このページではcookieを使用してサイト分析を行っています。このページにとどまると、cookieの使用に同意したものとみなされます。
+    <button id="1" onclick="showAlert(this.id)">Button 1</button>
+    <button id="2" onclick="showAlert(this.id)">Button 2</button>
+    <button id="3" onclick="showAlert(this.id)">Button 3</button>
   </body>
 </html>
