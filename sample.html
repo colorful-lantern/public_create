@@ -15,6 +15,17 @@
     function showAlert(buttonId) {
       alert("Button ID: " + buttonId);
     }
+
+    function displayId() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (id && id.length === 1 && !isNaN(id)) {
+        const idText = document.createTextNode("ID: " + id);
+        document.body.appendChild(idText);
+      }
+    }
+
+    window.onload = displayId;
   </script>
   <body>
     このページではcookieを使用してサイト分析を行っています。このページにとどまると、cookieの使用に同意したものとみなされます。
