@@ -1,21 +1,24 @@
-// Acceptricsの設定オブジェクトを作成
-window.acceptrics = {};
+// お知らせの内容を定義
+const notice = "これはお知らせの内容です。";
 
-// 設定をローカルストレージに保存
-localStorage.setItem("__acceptrics_conf", JSON.stringify({
-  bannerText: "当社のウェブサイトでは、お客様の体験を向上させ、コンテンツや広告をパーソナライズするために、Cookie や類似のテクノロジーを使用しています。当社のウェブサイト/アプリを引き続きご利用いただくことで、お客様はこれらのテクノロジーの使用と、パーソナライズされた広告およびパーソナライズされていない広告のための個人データの処理に同意することになります。[同意する] をクリックすると、上記のように Cookie の使用とデータの処理に同意したことになります。",
-  gcmAdvanced: "false",
-  backgroundColor: "#000000",
-  fontColor: "#ffffff",
-  geoArea: "worldwide"
-}));
+// ページが読み込まれたときに実行
+window.addEventListener("DOMContentLoaded", () => {
+  // お知らせ要素を作成
+  const noticeElement = document.createElement("div");
+  noticeElement.textContent = notice;
 
-// Acceptricsのスクリプトが読み込まれた後に実行されるイベントリスナーを設定
-document.addEventListener("__acceptrics_loaded", () => {
-  window.acceptrics.initializeSettings();
+  // スタイルを設定
+  noticeElement.style.position = "fixed";
+  noticeElement.style.bottom = "0";
+  noticeElement.style.left = "0";
+  noticeElement.style.width = "100%";
+  noticeElement.style.backgroundColor = "#333"; // 黒よりの灰色
+  noticeElement.style.color = "#fff"; // 白い文字色
+  noticeElement.style.textAlign = "center";
+  noticeElement.style.padding = "10px";
+  noticeElement.style.boxShadow = "0 -2px 5px rgba(0, 0, 0, 0.5)";
+  noticeElement.style.zIndex = "1000";
+
+  // ページに追加
+  document.body.appendChild(noticeElement);
 });
-
-// Acceptricsのスクリプトを動的に読み込む
-const script = document.createElement('script');
-script.src = "https://cdn.acceptrics.com";
-document.head.appendChild(script);
