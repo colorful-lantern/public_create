@@ -1,5 +1,5 @@
 // お知らせの内容を定義
-const notice = "これはお知らせの内容です。";
+const notice = "当サイトでは、サービス向上のためにCookieを使用しています。サイトの利用を継続することで、Cookieの使用に同意したものとみなします。";
 
 // ページが読み込まれたときに実行
 window.addEventListener("DOMContentLoaded", () => {
