@@ -59,9 +59,9 @@
                 labelContainer.childNodes[i].innerHTML = classPrediction;
                 // もしもprediction[0].probabilityが0.5以上ならば、「四角です」と表示、それ以外ならば「丸です」と表示する
                 if (prediction[0].probability.toFixed(2) >= 0.5) {
-                    labelContainer.childNodes[i].innerHTML = "四角です";
+                    labelContainer.childNodes[3].innerHTML = "丸です";
                 } else {
-                    labelContainer.childNodes[i].innerHTML = "丸です";
+                    labelContainer.childNodes[3].innerHTML = "四角です";
                 }
             }
         }
