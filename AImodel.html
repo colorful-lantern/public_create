@@ -47,7 +47,6 @@
     
         let model, webcam, labelContainer, maxPredictions;
         const resultContainer = document.getElementById('resultContainer');
-        let useFrontCamera = true; // フロントカメラを使用するかどうかのフラグ
     
         // Load the image model and setup the webcam
         async function init() {
@@ -62,31 +61,26 @@
             maxPredictions = model.getTotalClasses();
     
             // Convenience function to setup a webcam
-            await setupWebcam();
-        }
-        
-        async function setupWebcam() {
-            const flip = useFrontCamera; // フロントカメラを使用する場合は反転
+            const flip = true; // whether to flip the webcam
             webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-            await webcam.setup({ facingMode: useFrontCamera ? "user" : "environment" }); // フロントカメラかバックカメラかを設定
+            await webcam.setup(); // request access to the webcam
             await webcam.play();
             window.requestAnimationFrame(loop);
+    
+            // append elements to the DOM
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) { // and class labels
+                labelContainer.appendChild(document.createElement("div"));
+            }
         }
-        
-        function switchCamera() {
-            useFrontCamera = !useFrontCamera;
-            webcam.stop();
-            setupWebcam();
-        }
-        
-        document.getElementById('switchCameraButton').addEventListener('click', switchCamera);
-        
+    
         async function loop() {
             webcam.update(); // update the webcam frame
             await predict();
             window.requestAnimationFrame(loop);
         }
-        
+    
         // run the webcam image through the image model
         async function predict() {
             // predict can take in an image, video or canvas html element
@@ -103,11 +97,6 @@
                 }
             }
         }
-        
-        window.addEventListener('load', init);
-        
-        // HTMLにカメラ切り替えボタンを追加
-        document.body.insertAdjacentHTML('beforeend', '<button id="switchCameraButton">カメラ切り替え</button>');
     </script>
 </body>
 </html>
