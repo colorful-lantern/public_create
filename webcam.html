@@ -3,41 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webカメラ表示</title>
+    <title>Webカメラ表示と画像分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 </head>
 <body>
-    <h1>Webカメラの画像を表示</h1>
+    <h1>Webカメラの画像表示と画像分析</h1>
     <button id="startButton">スタート</button>
+    <button id="stopButton" disabled>ストップ</button>
     <select id="cameraSelect"></select>
-    <video id="webcam" autoplay playsinline width="640" height="480"></video>
+    <div id="webcam-container"></div>
+    <div id="prediction"></div>
 
     <script>
         const startButton = document.getElementById('startButton');
-        const webcam = document.getElementById('webcam');
+        const stopButton = document.getElementById('stopButton');
         const cameraSelect = document.getElementById('cameraSelect');
+        const webcamContainer = document.getElementById('webcam-container');
+        const predictionDiv = document.getElementById('prediction');
+        const URL = "https://teachablemachine.withgoogle.com/models/wNhqa45CO/";
+        let model, webcam, maxPredictions;
+        let isRunning = false;
 
         async function getCameras() {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            videoDevices.forEach(device => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop());
+
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+                cameraSelect.innerHTML = '';
+
+                if (videoDevices.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.text = 'デフォルトカメラ';
+                    cameraSelect.appendChild(option);
+                    return;
+                }
+
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `カメラ ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.text = 'デフォルトカメラ';
+                cameraSelect.insertBefore(defaultOption, cameraSelect.firstChild);
+                defaultOption.selected = true;
+
+            } catch (error) {
+                console.error('カメラの列挙中にエラーが発生しました:', error);
                 const option = document.createElement('option');
-                option.value = device.deviceId;
-                option.text = device.label || `Camera ${cameraSelect.length + 1}`;
+                option.value = '';
+                option.text = 'デフォルトカメラ';
                 cameraSelect.appendChild(option);
-            });
+            }
         }
 
-        startButton.addEventListener('click', async () => {
+        async function init() {
+            if (isRunning) return;
+
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
             const selectedCameraId = cameraSelect.value;
+            const flip = true;
+            const constraints = selectedCameraId 
+                ? { video: { deviceId: { exact: selectedCameraId } } }
+                : { video: { facingMode: 'environment' } };
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: selectedCameraId ? { exact: selectedCameraId } : undefined }
-                });
-                webcam.srcObject = stream;
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                webcam = new tmImage.Webcam(640, 480, flip);
+                await webcam.setup({ videoElement: document.createElement('video') });
+                webcam.videoElement.srcObject = stream;
+                await webcam.play();
+                isRunning = true;
+                window.requestAnimationFrame(loop);
+
+                webcamContainer.innerHTML = '';
+                webcamContainer.appendChild(webcam.canvas);
+
+                startButton.disabled = true;
+                stopButton.disabled = false;
             } catch (error) {
-                console.error('Error accessing webcam: ', error);
+                console.error('カメラの初期化中にエラーが発生しました:', error);
             }
-        });
+        }
+
+        async function loop() {
+            if (!isRunning) return;
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            let predictionText = '';
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction =
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                predictionText += classPrediction + "<br>";
+            }
+            predictionDiv.innerHTML = predictionText;
+        }
+
+        function stop() {
+            if (!isRunning) return;
+            isRunning = false;
+            if (webcam && webcam.videoElement && webcam.videoElement.srcObject) {
+                webcam.videoElement.srcObject.getTracks().forEach(track => track.stop());
+            }
+            webcamContainer.innerHTML = '';
+            predictionDiv.innerHTML = '';
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+
+        startButton.addEventListener('click', init);
+        stopButton.addEventListener('click', stop);
 
         getCameras();
     </script>
