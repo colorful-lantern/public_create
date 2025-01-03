@@ -26,14 +26,51 @@
         let isRunning = false;
 
         async function getCameras() {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            videoDevices.forEach(device => {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                // カメラが見つからない場合のデフォルトオプション
+                if (videoDevices.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.text = 'デフォルトカメラ';
+                    cameraSelect.appendChild(option);
+                    return;
+                }
+
+                // 利用可能なすべてのカメラをリストに追加
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    
+                    // デバイスのラベルが利用可能な場合はそれを使用し、そうでない場合は汎用的な名前を付ける
+                    if (device.label) {
+                        option.text = device.label;
+                    } else {
+                        option.text = `カメラ ${index + 1}`;
+                        if (index === 0) option.text += ' (おそらくフロント)';
+                        if (index === 1) option.text += ' (おそらくバック)';
+                    }
+                    
+                    cameraSelect.appendChild(option);
+                });
+
+                // デフォルトカメラオプションを追加
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.text = 'デフォルトカメラ';
+                cameraSelect.insertBefore(defaultOption, cameraSelect.firstChild);
+                defaultOption.selected = true;
+
+            } catch (error) {
+                console.error('カメラの列挙中にエラーが発生しました:', error);
+                // エラーが発生した場合、デフォルトオプションのみを追加
                 const option = document.createElement('option');
-                option.value = device.deviceId;
-                option.text = device.label || `Camera ${cameraSelect.length + 1}`;
+                option.value = '';
+                option.text = 'デフォルトカメラ';
                 cameraSelect.appendChild(option);
-            });
+            }
         }
 
         async function init() {
