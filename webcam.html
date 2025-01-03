@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webcam Example</title>
+    <!-- TensorFlow.js ライブラリを読み込む -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!-- Teachable Machine Image ライブラリを読み込む -->
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 </head>
 <body>
     <h1>Webcam Example</h1>
@@ -13,7 +17,6 @@
     </select>
     <button id="startButton">カメラ開始</button>
     <div id="webcam-container"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script>
         const URL = "https://teachablemachine.withgoogle.com/models/wNhqa45CO/";
         let model, webcam, labelContainer, maxPredictions;
