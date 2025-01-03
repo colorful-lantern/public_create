@@ -23,7 +23,7 @@
 
             const flip = true;
             webcam = new tmImage.Webcam(200, 200, flip, {
-                facingMode: "user" // フロントカメラを指定
+                facingMode: "enviroment" // フロントカメラを指定
             });
             await webcam.setup();
             await webcam.play();
