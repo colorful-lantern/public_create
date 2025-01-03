@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webカメラ表示と画像分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+</head>
+<body>
+    <h1>Webカメラの画像表示と画像分析</h1>
+    <button id="startButton">スタート</button>
+    <button id="stopButton" disabled>ストップ</button>
+    <select id="cameraSelect"></select>
+    <div id="webcam-container"></div>
+    <div id="prediction"></div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const cameraSelect = document.getElementById('cameraSelect');
+        const webcamContainer = document.getElementById('webcam-container');
+        const predictionDiv = document.getElementById('prediction');
+        const URL = "https://teachablemachine.withgoogle.com/models/wNhqa45CO/";
+        let model, webcam, maxPredictions;
+        let isRunning = false;
+
+        async function getCameras() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            videoDevices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Camera ${cameraSelect.length + 1}`;
+                cameraSelect.appendChild(option);
+            });
+        }
+
+        async function init() {
+            if (isRunning) return;
+
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            const selectedCameraId = cameraSelect.value;
+            const flip = true;
+            webcam = new tmImage.Webcam(640, 480, flip, selectedCameraId);
+            await webcam.setup();
+            await webcam.play();
+            isRunning = true;
+            window.requestAnimationFrame(loop);
+
+            webcamContainer.innerHTML = '';
+            webcamContainer.appendChild(webcam.canvas);
+
+            startButton.disabled = true;
+            stopButton.disabled = false;
+        }
+
+        async function loop() {
+            if (!isRunning) return;
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            let predictionText = '';
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                predictionText += classPrediction + "<br>";
+            }
+            predictionDiv.innerHTML = predictionText;
+        }
+
+        function stop() {
+            if (!isRunning) return;
+            isRunning = false;
+            webcam.stop();
+            webcamContainer.innerHTML = '';
+            predictionDiv.innerHTML = '';
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+
+        startButton.addEventListener('click', init);
+        stopButton.addEventListener('click', stop);
+
+        getCameras();
+    </script>
+</body>
+</html>
