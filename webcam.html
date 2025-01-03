@@ -25,6 +25,7 @@
         let model, webcam, maxPredictions;
         let isRunning = false;
 
+        // カメラのリストを取得して選択肢に追加
         async function getCameras() {
             try {
                 const devices = await navigator.mediaDevices.enumerateDevices();
@@ -73,6 +74,7 @@
             }
         }
 
+        // Teachable MachineモデルとWebカメラの初期化
         async function init() {
             if (isRunning) return;
 
@@ -83,8 +85,8 @@
             maxPredictions = model.getTotalClasses();
 
             const selectedCameraId = cameraSelect.value;
-            const flip = true;
-            webcam = new tmImage.Webcam(640, 480, flip, selectedCameraId);
+            const flip = true; // フロントカメラの場合に映像を反転する
+            webcam = new tmImage.Webcam(640, 480, flip, selectedCameraId ? { deviceId: selectedCameraId } : undefined);
             await webcam.setup();
             await webcam.play();
             isRunning = true;
@@ -97,6 +99,7 @@
             stopButton.disabled = false;
         }
 
+        // Webカメラ映像を更新し、予測を実行
         async function loop() {
             if (!isRunning) return;
             webcam.update();
@@ -104,16 +107,19 @@
             window.requestAnimationFrame(loop);
         }
 
+        // Teachable Machineモデルで予測を実行
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
             let predictionText = '';
             for (let i = 0; i < maxPredictions; i++) {
-                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                const classPrediction =
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
                 predictionText += classPrediction + "<br>";
             }
             predictionDiv.innerHTML = predictionText;
         }
 
+        // Webカメラと予測を停止
         function stop() {
             if (!isRunning) return;
             isRunning = false;
