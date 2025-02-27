@@ -121,6 +121,7 @@
         }
 
         function findCombinations() {
+            const notfindflag = true;
             const totalSquares = parseInt(document.querySelector('.number-btn.selected').textContent);
             const selectedTotal = parseInt(document.getElementById('total').value);
             const excludeButtons = document.querySelectorAll('.exclude-btn.selected');
@@ -152,11 +153,18 @@
                 const tr = table.insertRow();
                 for (let i = 1; i <= 9; i++) {
                     const td = tr.insertCell();
-                    td.textContent = combo.includes(i) ? '〇' : '';
+                    if(combo.includes(i)){
+                        td.textContent = '〇';
+                        notfindflag = false;
+                    }else{
+                        td.textContent = '';
+                    }
                 }
             });
-            
             resultsDiv.appendChild(table);
+            if(notfindflag==true){
+                document.getElementById('results').innerHTML = '組み合わせが見つかりませんでした。';
+            }
         }
 
         function getCombinations(arr, count, target) {
