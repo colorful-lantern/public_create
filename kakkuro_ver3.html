@@ -121,8 +121,13 @@
         }
 
         function findCombinations() {
-            const notfindflag = true;
-            const totalSquares = parseInt(document.querySelector('.number-btn.selected').textContent);
+            let notfindflag = true;
+            const selectedButton = document.querySelector('.number-btn.selectedgreen');
+            if (!selectedButton) {
+                alert('全部のマス数を選択してください。');
+                return;
+            }
+            const totalSquares = parseInt(selectedButton.textContent);
             const selectedTotal = parseInt(document.getElementById('total').value);
             const excludeButtons = document.querySelectorAll('.exclude-btn.selected');
             const excludeNumbers = Array.from(excludeButtons).map(button => parseInt(button.textContent));
@@ -162,9 +167,7 @@
                 }
             });
             resultsDiv.appendChild(table);
-            if(notfindflag==true){
-                document.getElementById('results').innerHTML = '組み合わせが見つかりませんでした。';
-            }
+            if(notfindflag)document.getElementById('results').innerHTML = '組み合わせが見つかりませんでした。';
         }
 
         function getCombinations(arr, count, target) {
