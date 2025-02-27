@@ -22,6 +22,7 @@
         }
             */
         .selected { background-color: #007bff; color: white; }
+        .selectedgreen {background-color: green; color: green;}
         table { border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid black; padding: 5px; text-align: center; min-width: 35px; max-width: 100px; width: auto;}
         th { background-color: #b1d7ff; }
@@ -95,16 +96,15 @@
             const numberButtons = document.getElementById('numberButtons');
             for (let i = 2; i <= 7; i++) {
                 let button = document.createElement('button');
-                button.style.backgroundColor = 'green';
                 button.className = 'number-btn btn btn-outline-success m-2 p-2 btn1';
                 button.textContent = i;
                 button.onclick = function() {
-                    document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
-                    this.classList.add('selected');
+                    document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selectedgreen'));
+                    this.classList.add('selectedgreen');
                 };
                 numberButtons.appendChild(button);
             }
-            numberButtons.children[1].classList.add('selected');
+            numberButtons.children[1].classList.add('selectedgreen');
         }
 
         function generateExcludeButtons() {
